@@ -16,16 +16,13 @@ namespace Big2.Models
 
             this.deck = new Deck<PokerCard>();
             foreach (var command in commands[0].Split(" "))
-            {
                 this.deck.Cards.Push(new PokerCard(command));
-            }
 
             var players = new List<Player>();
             for (int i = 1; i <= 4; i++)
             {
                 var player = new RealPlayer();
                 player.Namehimself(commands[i]);
-
                 players.Add(player);
             }
 
@@ -36,9 +33,7 @@ namespace Big2.Models
             this._commands.Clear();
 
             foreach (var command in commands)
-            {
                 this._commands.Enqueue(command);
-            }
         }
 
         public override void DrawCard()
@@ -52,22 +47,16 @@ namespace Big2.Models
                     var card = this.deck.Cards.Pop();
 
                     if (card.Number == 0)
-                    {
                         addIndex = 4 - player.Order;
-                    }
 
                     hand.Cards.Add(card);
                 }
             }
 
-            //Console.WriteLine(addIndex);
-
             foreach (var player in players)
             {
                 player.Order = (player.Order + addIndex) % 4;
-
-                var hand = player.Hand;
-                hand.Cards = hand.Cards.OrderBy(c => ((PokerCard)c).Rank.Number).ThenBy(c => ((PokerCard)c).Suit.Number).ToList();
+                player.Hand.Cards = player.Hand.Cards.OrderBy(c => ((PokerCard)c).Rank.Number).ThenBy(c => ((PokerCard)c).Suit.Number).ToList();
             }
 
             this.players = this.players.OrderBy(p => p.Order).ToList();
@@ -75,15 +64,12 @@ namespace Big2.Models
 
         public override bool TakesATurn()
         {
-            this.round++;
             Console.WriteLine("新的回合開始了。");
 
             while (Take()) ;
 
             if (this.players.Any(p => !p.Hand.Cards.Any()))
-            {
                 return false;
-            }
 
             return true;
         }
@@ -99,9 +85,7 @@ namespace Big2.Models
 
                     var addIndex = 4 - player.Order;
                     foreach (var player1 in players)
-                    {
                         player1.Order = (player1.Order + addIndex) % 4;
-                    }
 
                     this.players = this.players.OrderBy(p => p.Order).ToList();
 
@@ -110,25 +94,18 @@ namespace Big2.Models
 
                 Console.WriteLine($"輪到{player.Name}了");
 
-                Temp(player);
+                Play(player);
 
                 if (!player.Hand.Cards.Any())
-                {
-
                     return false;
-                }
-
             }
 
             return true;
         }
 
-        public void Temp(Player player)
+        public void Play(Player player)
         {
-            var cardsText = player.Hand.Cards.Select((c, i) =>
-            {
-                return new { index = i, Card = c.ToString() };
-            });
+            var cardsText = player.Hand.Cards.Select((c, i) => new { index = i, Card = c.ToString() });
 
             Console.WriteLine(string.Join(" ", cardsText.Select(c => $"{c.index,-4}")));
             Console.WriteLine(string.Join(" ", cardsText.Select(c => $"{c.Card,-4}")));
@@ -151,9 +128,7 @@ namespace Big2.Models
                     Console.WriteLine($"你不能在新的回合中喊 PASS");
                 }
                 else if (!cards.Any())
-                {
                     Console.WriteLine($"玩家 {player.Name} PASS.");
-                }
                 else if ((!_topCards.Item2.Any() || _topCards.Item2.Count == 1) && cards.Count == 1 && isCheck)
                 {
                     _topCards.Item1 = player;
@@ -195,16 +170,10 @@ namespace Big2.Models
                 }
 
                 if (!result)
-                {
-                    Temp(player);
-                }
+                    Play(player);
                 else
-                {
                     foreach (var card in cards)
-                    {
                         player.Hand.Cards.Remove(card);
-                    }
-                }
             }
         }
 
